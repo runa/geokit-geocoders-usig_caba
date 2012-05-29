@@ -35,6 +35,16 @@ class TestUsigCaba < Test::Unit::TestCase
     assert_equal(3857, res.street_number, "Bad Street Number")
   end
 
+  def test_lookup_address_code_with_abbr
+    res = Geokit::Geocoders::Usigcaba.geocode("Av. de los incas 4004", lookup_code: true)
+    assert(res.success, "Error quering geocoder")
+    assert_equal("DE LOS INCAS AV.", res.street_name, "Bad Street Name")
+    res = Geokit::Geocoders::Usigcaba.geocode("Av de los incas 4004", lookup_code: true)
+    assert(res.success, "Error quering geocoder")
+    assert_equal("DE LOS INCAS AV.", res.street_name, "Bad Street Name")
+  end
+
+
   def test_invalid_address
     res = Geokit::Geocoders::Usigcaba.geocode("Foobar 1724")
     refute(res.success, "Error quering geocoder")
