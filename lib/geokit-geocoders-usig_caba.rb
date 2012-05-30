@@ -72,8 +72,8 @@ module Geokit
           logger.debug("got HTTP #{req.code}, #{data.length} bytes from http://servicios.usig.buenosaires.gov.ar/callejero") 
           streets = MultiJson.decode(data)
           streets.each{|s|
-            s[1].force_encoding("ISO-8859-1")
-            s[2].force_encoding("ISO-8859-1")
+            s[1].force_encoding("ISO-8859-1").encode!("UTF-8")
+            s[2].force_encoding("ISO-8859-1").encode!("UTF-8")
           }
           streets
         end
@@ -81,7 +81,7 @@ module Geokit
 
       # Find street code from USIG DB
       def self.find_street_code(name,street_number=false)
-        words = name.upcase.split.compact.sort.uniq
+        words = name.split(/[\s,.]+/).compact.sort.uniq
         candidates = streets.find_all{|c| # finds candidates based on the name 
           match_words(c[2],words)
         }
@@ -101,10 +101,10 @@ module Geokit
 
       # Checks all words against a string. Returns false if any of them is not found
       def self.match_words(string,words)
-        words_re = words.map{|w| Regexp.new("(\\s|^)#{w}(\\s|$)")}
-        words_re.each{|w| 
+        words_re = words.map{|w| w.gsub(/['\.]/,"").tr("áéíóúüÁÉÍÓÚÜàèìòùÀÈÌÒÙ", "aeiouuAEIOUUaeiouAEIOU").upcase}.map{|w| [w,Regexp.new("(\\s|^)#{w}(\\s|$)")]}
+        words_re.each{|w,w_re| 
           logger.debug("#{string}.index(#{w})")
-          return false if not string.index(w)
+          return false if not string.index(w) or not string.index(w_re)
         }
       end
     end
