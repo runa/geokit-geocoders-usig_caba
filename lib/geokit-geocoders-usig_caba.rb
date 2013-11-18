@@ -102,7 +102,7 @@ module Geokit
 
       # Checks all words against a string. Returns false if any of them is not found
       def self.match_words(string,words)
-        words_re = words.map{|w| w.gsub(/['\.]/,"").tr("áéíóúüÁÉÍÓÚÜàèìòùÀÈÌÒÙ", "aeiouuAEIOUUaeiouAEIOU").upcase}.reject{|w| ["PJE", "PSJE", "PASAJE"].index(w)}.map{|w| [w,Regexp.new("(\\s|^)#{w}(\\s|$)")]}
+        words_re = words.map{|w| w.gsub(/['\.]/,"").tr("áéíóúüÁÉÍÓÚÜàèìòùÀÈÌÒÙñÑ", "aeiouuAEIOUUaeiouAEIOUnN").upcase}.reject{|w| ["PJE", "PSJE", "PASAJE"].index(w)}.map{|w| [w,Regexp.new("(\\s|^)#{Regexp.escape(w)}(\\s|$)")]}
         words_re.each{|w,w_re| 
           logger.debug("#{string}.index(#{w})")
           return false if (not string.index(w)) or (not string.index(w_re))
