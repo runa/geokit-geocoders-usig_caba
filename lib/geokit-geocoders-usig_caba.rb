@@ -90,7 +90,8 @@ module Geokit
         if street_number # filters out candidates using the street number ranges
           candidates = candidates.find_all{|street|
             street[3].find{|range_from, range_to|
-              range_to >= street_number && range_to >= street_number 
+              street_number >= range_from && 
+              street_number <= range_to
             }
           }
         end
