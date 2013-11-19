@@ -82,21 +82,23 @@ module Geokit
       # Find street code from USIG DB
       def self.find_street_code(name,street_number=false)
         words = name.split(/[\s,.]+/).compact.sort.uniq
-        candidates = streets.find_all{|c| # finds candidates based on the name 
-          match_words(c[2],words)
-        }
-        logger.debug("Street candidates for #{name} #{street_number}: #{candidates}")
-
         if street_number # filters out candidates using the street number ranges
-          candidates = candidates.find_all{|street|
-            street[3].find{|range_from, range_to|
-              street_number >= range_from && 
-              street_number <= range_to
-            }
+          candidate = streets.find{|street| # finds candidates based on the name 
+            if match_words(street[2],words)
+              street[3].find{|(range_from, range_to)|
+                street_number >= range_from && 
+                street_number <= range_to 
+              }
+            end
+          }
+        else
+          candidate = streets.find{|c| # finds candidates based on the name 
+            match_words(c[2],words)
           }
         end
-        logger.debug("Candidate for #{name}: #{candidates}")
-        candidates.first
+
+#        logger.debug("Candidate for #{name}: #{candidate}")
+        candidate
       end
       private
 
@@ -104,7 +106,7 @@ module Geokit
       def self.match_words(string,words)
         words_re = words.map{|w| w.gsub(/['\.]/,"").tr("áéíóúüÁÉÍÓÚÜàèìòùÀÈÌÒÙñÑ", "aeiouuAEIOUUaeiouAEIOUnN").upcase}.reject{|w| ["PJE", "PSJE", "PASAJE"].index(w)}.map{|w| [w,Regexp.new("(\\s|^)#{Regexp.escape(w)}(\\s|$)")]}
         words_re.each{|w,w_re| 
-          logger.debug("#{string}.index(#{w})")
+#          logger.debug("#{string}.index(#{w})")
           return false if (not string.index(w)) or (not string.index(w_re))
         }
       end
